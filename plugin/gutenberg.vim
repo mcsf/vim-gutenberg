@@ -31,7 +31,7 @@ endfunction
 
 function! s:HandleTagsJob(job, status)
 	if a:status == 0
-		echo "Gutenberg tags successfully regenerated."
+		echomsg "Gutenberg tags successfully regenerated."
 	else
 		echoerr "Could not regenerate Gutenberg tags."
 	endif
