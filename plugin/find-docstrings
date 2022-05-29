@@ -1,0 +1,39 @@
+#!/bin/sh
+
+if ! git --version > /dev/null
+then
+	echo "fatal: 'git' not found"
+	exit 1
+fi
+
+case "$1" in
+	-*|'')
+		echo "usage: $0 <symbol> [path-match]"
+		exit 2;;
+esac
+
+_find_docstrings() {
+	symbol="$1"
+	match="$2"
+	git ls-files \
+		| grep -E '\.(php|js|ts)$' \
+		| grep -E "${match:-.}" \
+		| xargs grep -nE "export \w+ $symbol\b" \
+		| while IFS=: read -r file line _
+			do
+				printf '\n## %s\n' "$file"
+				_get_docstring "$file" "$line"
+			done
+}
+
+_get_docstring() {
+	file="$1"
+	line="$2"
+	awk -v "line=$line" '
+		/\/\*\*/ { on = 1; delete buf; n = 0 }
+		on       { buf[++n] = $0 }
+		NR==line { for (i=1; i<=n; i++) print buf[i] }
+	' "$file"
+}
+
+_find_docstrings "$@"

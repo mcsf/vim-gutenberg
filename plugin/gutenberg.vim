@@ -1,5 +1,6 @@
 let s:gutenberg_dir = '~/gutenberg'
 let s:wp_tags       = '/Applications/MAMP/htdocs/wpdev/tags'
+let s:__DIR__       = expand('<sfile>:p:h')
 
 augroup gutenberg
 	autocmd!
@@ -25,6 +26,13 @@ function! s:EnterGutenberg()
 					\ "cwd": expand(s:gutenberg_dir),
 					\ })
 
+		" Look up a symbol's docstring if it's readily parseable in JS or PHP.
+		" In the case of JS/TS, this acts as a fallback when TypeScript's LSP
+		" fails to find documentation (LSP support is provided by the ALE
+		" plugin.)
+		let &keywordprg = fnameescape(s:__DIR__ . '/find-docstrings')
+		nnoremap <Leader>K :GutenbergFindDocstring<cr>
+
 		" Personal UI preferences when working specifically in Gutenberg.
 		set laststatus=2
 		set number
@@ -39,4 +47,10 @@ function! s:HandleTagsJob(job, status)
 	else
 		echoerr "Could not regenerate Gutenberg tags."
 	endif
+endfunction
+
+" Like Vim's `K` lookup, but using `system()` for dispatch rather than `:!`
+command! -nargs=0 GutenbergFindDocstring call s:FindDocstrings(expand('<cword>'))
+function! s:FindDocstrings(symbol)
+	echo system(printf('%s "%s"', &keywordprg, escape(a:symbol, '\')))
 endfunction
