@@ -25,6 +25,10 @@ function! s:EnterGutenberg()
 					\ "cwd": expand(s:gutenberg_dir),
 					\ })
 
+		" Personal UI preferences when working specifically in Gutenberg.
+		set laststatus=2
+		set number
+
 	endif
 
 endfunction
