@@ -64,8 +64,11 @@ function! s:TagFuncNearestMatch(pattern, flags, info)
 endfunction
 
 function! s:CommonPathScore(a, b)
-	let a = split(a:a, "/")
-	let b = split(a:b, "/")
+	let a = substitute(a:a, "^\./", "", "")
+	let b = substitute(a:b, "^\./", "", "")
+
+	let a = split(a, "/")
+	let b = split(b, "/")
 	let l = min([len(a), len(b)])
 	let i = 0
 	while i < l
