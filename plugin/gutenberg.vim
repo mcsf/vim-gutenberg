@@ -4,10 +4,11 @@ let s:wp_tags       = expand('$WP_PATH/tags')
 
 augroup gutenberg
 	autocmd!
-	autocmd VimEnter,DirChanged * call s:EnterGutenberg()
+	autocmd VimEnter,DirChanged * call s:EnterGutenbergProject()
+	autocmd BufEnter * call s:EnterGutenbergFile()
 augroup END
 
-function! s:EnterGutenberg()
+function! s:EnterGutenbergProject()
 
 	" A set of automations when working in the Gutenberg repository.
 	if (getcwd() . '/') =~ '^' . expand(s:gutenberg_dir) . '/'
@@ -32,13 +33,39 @@ function! s:EnterGutenberg()
 					\ })
 
 
-		" Personal UI preferences when working specifically in Gutenberg.
-		set laststatus=2
-		set number
-
-	endif
-
 endfunction
+
+" Personal UI preferences when working specifically in Gutenberg.
+function! s:EnterGutenbergFile()
+	let fname = getbufinfo('%')[0].name
+	if fname =~ '^' . expand(s:gutenberg_dir) || fname =~ '^' . expand(s:wp_dir)
+		if fname =~ "__Tagbar__"
+			return
+		endif
+		if get(g:, 'gutenberg_focus_mode', 1)
+			setlocal laststatus& number&
+		else
+			setlocal laststatus=2
+			setlocal number
+		endif
+	endif
+endfunction
+
+function! s:ToggleFocus()
+	if get(g:, 'gutenberg_focus_mode')
+		let g:gutenberg_focus_mode = 0
+		echom "Focus mode disabled"
+	else
+		let g:gutenberg_focus_mode = 1
+		echom "Focus mode enabled"
+	endif
+	windo call s:EnterGutenbergFile()
+endfunction
+
+let g:gutenberg_focus_mode = 1
+call s:EnterGutenbergFile()
+
+command! -nargs=0 GutenbergFocus call s:ToggleFocus()
 
 function! s:HandleTagsJob(job, status)
 	if a:status == 0
