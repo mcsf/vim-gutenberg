@@ -28,10 +28,23 @@ function! s:EnterGutenbergProject()
 					\ "err_io": "null",
 					\ "out_io": "file",
 					\ "out_name": expand(s:gutenberg_dir . "/tags"),
-					\ "exit_cb": "s:HandleTagsJob",
+					\ "exit_cb": function("s:HandleTagsJob", ["Gutenberg"]),
 					\ "cwd": expand(s:gutenberg_dir),
 					\ })
 
+		" Regenerate WordPress's tags index in the background.
+		let job = job_start('agtag', {
+					\ "in_io": "null",
+					\ "err_io": "null",
+					\ "out_io": "file",
+					\ "out_name": expand(s:wp_dir . "/tags"),
+					\ "exit_cb": function("s:HandleTagsJob", ["WordPress"]),
+					\ "cwd": expand(s:wp_dir),
+					\ })
+
+		set keywordprg=dash
+
+	endif
 
 endfunction
 
@@ -67,11 +80,11 @@ call s:EnterGutenbergFile()
 
 command! -nargs=0 GutenbergFocus call s:ToggleFocus()
 
-function! s:HandleTagsJob(job, status)
+function! s:HandleTagsJob(label, job, status)
 	if a:status == 0
-		echomsg "Gutenberg tags successfully regenerated."
+		echomsg a:label . " tags successfully regenerated."
 	else
-		echoerr "Could not regenerate Gutenberg tags."
+		echoerr "Could not regenerate " . a:label . " tags."
 	endif
 endfunction
 
