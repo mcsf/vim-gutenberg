@@ -1,6 +1,6 @@
-let s:gutenberg_dir = '~/gutenberg'
-let s:wp_tags       = '/Applications/MAMP/htdocs/wpdev/tags'
-let s:__DIR__       = expand('<sfile>:p:h')
+let s:gutenberg_dir = expand('$GB_PATH')
+let s:wp_dir        = expand('$WP_PATH')
+let s:wp_tags       = expand('$WP_PATH/tags')
 
 augroup gutenberg
 	autocmd!
